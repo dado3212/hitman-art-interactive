@@ -26,6 +26,5 @@ yarn-error.log*
 /api/Config/Constants.php
 /api/Config/Settings.php
 /api/Config/JwtConfig.php
-/api/Config/firebase-service-account.json
-/api/phinx.yml
 /api/maps/
+import.sql

@@ -5,8 +5,6 @@ import Location from './views/Location.vue'
 import TermsOfUse from './views/TermsOfUse.vue'
 import PrivacyPolicy from './views/PrivacyPolicy.vue'
 import About from "./views/About";
-import OneYear from "./views/SpecialEvents/OneYear";
-import SupportTheSite from "./views/SupportTheSite";
 import Brand from "./views/Brand";
 import MissionAdmin from "./views/MissionAdmin.vue";
 
@@ -32,11 +30,6 @@ export default new Router({
             component: PrivacyPolicy,
         },
         {
-            path: '/one-year',
-            name: 'one-year',
-            component: OneYear
-        },
-        {
             path: '/about',
             name: 'about',
             component: About,
@@ -45,11 +38,6 @@ export default new Router({
             path: '/brand',
             name: 'brand',
             component: Brand,
-        },
-        {
-            path: '/support-the-site',
-            name: 'support-the-site',
-            component: SupportTheSite,
         },
         {
             path: '/games/:slug',

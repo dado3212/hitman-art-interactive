@@ -60,5 +60,12 @@ composer upgrade ?
 Got redacted database dump from MrMike.
 - http://alexbeals.com:8080/games/hitman/sapienza/world-of-tomorrow (what doesn't really work)
 
+TODO: Update this for the repo and a shareable MySQL backend.
+Create a database `hitman_art_interactive` with the collation `utf8mb4_unicode_ci`.
+
+`mysql --user=<user> --password=<password> --database=hitman_art_interactive --default-character-set=utf8mb4 < import.sql`
+
+`DROP TABLE elusive_targets; DROP TABLE redacted_data; DROP TABLE roulette_matchups; DROP TABLE roulette_messages; DROP TABLE roulette_objectives; DROP TABLE spin_history; DROP TABLE phinxlog;`
+
 # Legal
 HITMAN™, HITMAN™ 2, the HITMAN™ logo, images, and text are the property of IO Interactive.
