@@ -48,8 +48,13 @@ vendor/bin/phinx migrate -e development
 composer install
 composer upgrade ?
 
+## Start the PHP API
 * php -S 0.0.0.0:8174
-* npm run build
+
+## Start the frontend
+* sudo su
+* nvm use v13.14.0
+* npm run build (?)
 * npm run serve
 
 Change in MySQL hitman_art.missions, change all the `svg` columns to 1 (TODO: fix migration script)
