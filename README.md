@@ -1,3 +1,7 @@
+All credit right now goes to https://gitlab.com/hitmaps/hitmaps.
+
+TODO: Fix up this README and gut the irrelevant logic.
+
 # HITMAPS
 HITMAPS is an interactive site for viewing maps for the Hitman series.
 
