@@ -24,5 +24,8 @@ module.exports = {
         publicPath: 'https://www.hitmaps.com'
       })
     ]
+  },
+  devServer: {
+    disableHostCheck: true
   }
 }

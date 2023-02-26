@@ -545,14 +545,14 @@ class Mission {
     /**
      * @return Collection
      */
-    public function getFloorNames(): ArrayCollection|Collection {
+    public function getFloorNames(): Collection {
         return $this->floorNames;
     }
 
     /**
      * @param Collection $floorNames
      */
-    public function setFloorNames(ArrayCollection|Collection $floorNames): void {
+    public function setFloorNames(Collection $floorNames): void {
         $this->floorNames = $floorNames;
     }
 }

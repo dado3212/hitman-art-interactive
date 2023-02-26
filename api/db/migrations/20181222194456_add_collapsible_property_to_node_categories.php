@@ -6,7 +6,7 @@ use Phinx\Migration\AbstractMigration;
 class AddCollapsiblePropertyToNodeCategories extends AbstractMigration {
     public function up() {
         $this->table('node_categories')
-            ->addColumn('collapsible', 'boolean')
+            ->addColumn('collapsible', 'boolean', ['default' => false])
             ->update();
 
         $this->execute("UPDATE `node_categories`

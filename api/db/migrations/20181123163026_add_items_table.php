@@ -7,8 +7,8 @@ class AddItemsTable extends AbstractMigration {
     public function change() {
         $this->table('items')
             ->addColumn('name', 'string')
-            ->addColumn('target', 'string')
-            ->addColumn('description', 'string')
+            ->addColumn('target', 'string', ['null' => true])
+            ->addColumn('description', 'string', ['null' => true])
             ->addColumn('image', 'binary', ['null' => true])
             ->addColumn('type', 'string')
             ->addColumn('icon', 'string')

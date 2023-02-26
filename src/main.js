@@ -32,9 +32,7 @@ Vue.config.productionTip = false
 //For Copyright
 Vue.prototype.$currentYear = new Date().getFullYear()
 Vue.prototype.$http = axios
-Vue.prototype.$domain = window.location.hostname.includes('localhost') ?
-    'http://localhost:8000' :
-    `${document.location.protocol}//${window.location.hostname}`;
+Vue.prototype.$domain = 'http://alexbeals.com:8174';
 Vue.prototype.$hostname = window.location.hostname;
 const port = document.location.port ? `:${document.location.port}` : '';
 Vue.prototype.$vueDomain = `${document.location.protocol}//${window.location.hostname}${port}`;

@@ -58,8 +58,18 @@ class MissionViewModel {
         $this->topLeftCoordinate = $mission->getTopLeftCoordinate();
         $this->bottomRightCoordinate = $mission->getBottomRightCoordinate();
         $this->satelliteView = $mission->getSatelliteView();
-        $this->beginEffectiveDate = $mission->getBeginEffectiveDate()?->format(DateTimeInterface::ATOM);
-        $this->endEffectiveDate = $mission->getEndEffectiveDate()?->format(DateTimeInterface::ATOM);
+        $f = $mission->getBeginEffectiveDate();
+        if ($f === null) {
+            $this->beginEffectiveDate = null;
+        } else {
+            $this->beginEffectiveDate = $f->format(DateTimeInterface::ATOM);
+        }
+        $f = $mission->getEndEffectiveDate();
+        if ($f === null) {
+            $this->endEffectiveDate = null;
+        } else {
+            $this->endEffectiveDate = $f->format(DateTimeInterface::ATOM);
+        }
         $this->missionType = $mission->getMissionType();
         $this->variants = array_map(fn(MissionVariant $x) => new MissionVariantViewModel($x), $mission->getVariants()->toArray());
         $this->backgroundUrl = $mission->getBackgroundUrl();

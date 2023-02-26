@@ -99,7 +99,7 @@ class Node {
     public $quantity;
 
     /**
-     * @ORM\ManyToMany(targetEntity="MissionVariant", cascade="persist")
+     * @ORM\ManyToMany(targetEntity="MissionVariant", cascade={"persist"})
      * @ORM\JoinTable(name="node_to_mission_variants",
      *                joinColumns={@ORM\JoinColumn(name="node_id", referencedColumnName="id")},
      *                inverseJoinColumns={@ORM\JoinColumn(name="variant_id", referencedColumnName="id", unique=true)}
@@ -109,7 +109,7 @@ class Node {
     private $variants;
 
     /**
-     * @ORM\OneToMany(targetEntity="NodeNote", mappedBy="node", fetch="EAGER", cascade="persist", orphanRemoval=true)
+     * @ORM\OneToMany(targetEntity="NodeNote", mappedBy="node", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var $notes Collection
      */
     private $notes;

@@ -33,5 +33,22 @@ HITMAPS is an interactive site for viewing maps for the Hitman series.
 2. Make the necessary changes on your fork, making sensible commits along the way
 3. Open a merge request to submit your changes once they are complete
 
+# This version
+v13.1.0 (failed), v13.6.0 (failed), 13.14.0
+nvm install v13.14.0 (npm 6.14.4)
+npm install (with a 2GB swap instance on an ec2 micro)
+php -v 7.4.5
+
+vendor/bin/phinx migrate -e development
+
+composer install
+composer upgrade ?
+
+* php -S 0.0.0.0:8174
+* npm run build
+* npm run serve
+
+Change in MySQL hitman_art.missions, change all the `svg` columns to 1 (TODO: fix migration script)
+
 # Legal
 HITMAN™, HITMAN™ 2, the HITMAN™ logo, images, and text are the property of IO Interactive.

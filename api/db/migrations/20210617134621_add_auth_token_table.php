@@ -8,8 +8,8 @@ final class AddAuthTokenTable extends AbstractMigration {
         $this->table('auth_tokens')
             ->addColumn('description', 'string')
             ->addColumn('token', 'string')
-            ->addColumn('activated_at', 'timestamp')
-            ->addColumn('deactivated_at', 'timestamp')
+            ->addColumn('activated_at', 'timestamp', ['null' => true])
+            ->addColumn('deactivated_at', 'timestamp', ['null' => true])
             ->create();
     }
 }

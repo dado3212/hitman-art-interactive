@@ -32,10 +32,14 @@ class ChangeImageToString extends AbstractMigration {
     public function change() {
         $this->table('items')
             ->removeColumn('image')
+            ->update();
+        $this->table('items')
             ->addColumn('image', 'string', ['null' => true])
             ->update();
         $this->table('nodes')
             ->removeColumn('image')
+            ->update();
+        $this->table('nodes')
             ->addColumn('image', 'string', ['null' => true])
             ->update();
     }
