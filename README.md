@@ -57,9 +57,7 @@ composer upgrade ?
 * npm run build (?)
 * npm run serve
 
-Change in MySQL hitman_art.missions, change all the `svg` columns to 1 (TODO: fix migration script)
-
-TODO: Needs proper database dump.
+Got redacted database dump from MrMike.
 - http://alexbeals.com:8080/games/hitman/sapienza/world-of-tomorrow (what doesn't really work)
 
 # Legal
