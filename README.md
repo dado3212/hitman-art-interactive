@@ -57,7 +57,7 @@ Create a database `hitman_art_interactive` with the collation `utf8mb4_unicode_c
 
 `mysql --user=<user> --password=<password> --database=hitman_art_interactive --default-character-set=utf8mb4 < import.sql`
 
-`DROP TABLE elusive_targets; DROP TABLE redacted_data; DROP TABLE roulette_matchups; DROP TABLE roulette_messages; DROP TABLE roulette_objectives; DROP TABLE spin_history; DROP TABLE phinxlog;`
+`DROP TABLE elusive_targets; DROP TABLE redacted_data; DROP TABLE roulette_matchups; DROP TABLE roulette_messages; DROP TABLE roulette_objectives; DROP TABLE spin_history; DROP TABLE phinxlog; DROP TABLE disguises; DROP TABLE disguise_areas; DROP TABLE disguise_to_ioi_guid; DROP TABLE foliage; DROP TABLE ledges;`
 
 # Legal
 HITMAN™, HITMAN™ 2, the HITMAN™ logo, images, and text are the property of IO Interactive.
