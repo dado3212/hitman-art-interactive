@@ -50,5 +50,8 @@ composer upgrade ?
 
 Change in MySQL hitman_art.missions, change all the `svg` columns to 1 (TODO: fix migration script)
 
+TODO: Needs proper database dump.
+- http://alexbeals.com:8080/games/hitman/sapienza/world-of-tomorrow (what doesn't really work)
+
 # Legal
 HITMAN™, HITMAN™ 2, the HITMAN™ logo, images, and text are the property of IO Interactive.
