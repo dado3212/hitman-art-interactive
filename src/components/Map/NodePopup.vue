@@ -139,8 +139,6 @@ export default {
                 case 'intel':
                 case 'camera-intel':
                     return 'intel';
-                case 'disguise':
-                    return 'disguise';
                 case 'blend-in':
                     return 'emote';
                 case 'conceal-item':

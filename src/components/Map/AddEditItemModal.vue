@@ -337,8 +337,6 @@ export default {
 
             return ['Navigation|agency-pickup',
                 'Navigation|exit-location',
-                'Navigation|ledge',
-                'Navigation|foliage',
                 'Navigation|up-stair',
                 'Navigation|starting-location',
                 'Navigation|up-pipe'].indexOf(this.currentCategory) === -1

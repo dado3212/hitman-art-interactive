@@ -40,39 +40,46 @@ class LoginUserService {
 
     public function loginWithDiscordToken(string $tokenType, string $accessToken) {
         // 1. Check actual token and get id
-        $resp = $this->httpClient->get('https://discordapp.com/api/users/@me', [
-            RequestOptions::HEADERS => [
-                'Authorization' => "{$tokenType} {$accessToken}"
-            ]
-        ]);
+        // $resp = $this->httpClient->get('https://discordapp.com/api/users/@me', [
+        //     RequestOptions::HEADERS => [
+        //         'Authorization' => "{$tokenType} {$accessToken}"
+        //     ]
+        // ]);
 
-        if ($resp->getStatusCode() !== 200) {
-            throw new DiscordAuthenticationException('/api/users/@me', $resp->getStatusCode());
-        }
-        $profileData = json_decode($resp->getBody(), true);
+        // if ($resp->getStatusCode() !== 200) {
+        //     throw new DiscordAuthenticationException('/api/users/@me', $resp->getStatusCode());
+        // }
+        // $profileData = json_decode($resp->getBody(), true);
 
-        // 2. Ensure they're in the HITMAPS discord
-        $resp = $this->httpClient->get('https://discordapp.com/api/users/@me/guilds', [
-            RequestOptions::HEADERS => [
-                'Authorization' => "{$tokenType} {$accessToken}"
-            ]
-        ]);
+        // // 2. Ensure they're in the HITMAPS discord
+        // $resp = $this->httpClient->get('https://discordapp.com/api/users/@me/guilds', [
+        //     RequestOptions::HEADERS => [
+        //         'Authorization' => "{$tokenType} {$accessToken}"
+        //     ]
+        // ]);
 
-        if ($resp->getStatusCode() !== 200) {
-            throw new DiscordAuthenticationException('/api/users/@me/guilds', $resp->getStatusCode());
-        }
-        $guildsData = \GuzzleHttp\json_decode($resp->getBody(), true);
+        // if ($resp->getStatusCode() !== 200) {
+        //     throw new DiscordAuthenticationException('/api/users/@me/guilds', $resp->getStatusCode());
+        // }
+        // $guildsData = \GuzzleHttp\json_decode($resp->getBody(), true);
 
-        $inServer = false;
-        foreach ($guildsData as $guild) {
-            if ($guild['id'] === self::HITMAPS_SERVER_ID) {
-                $inServer = true;
-                break;
-            }
-        }
-        if (!$inServer) {
-            throw new UserNotInServerException();
-        }
+        // $inServer = false;
+        // foreach ($guildsData as $guild) {
+        //     if ($guild['id'] === self::HITMAPS_SERVER_ID) {
+        //         $inServer = true;
+        //         break;
+        //     }
+        // }
+        // if (!$inServer) {
+        //     throw new UserNotInServerException();
+        // }
+        // Mock out Discord for now and just make everyone an admin
+        $profileData = [
+            'email' => 'redacted@example.com1', # temporary hack, this is an admin
+            'username' => 'admin',
+            'discriminator' => 'absolute',
+            'id' => '1', # this is an admin
+        ];
 
         $user = $this->entityManager->getRepository(User::class)->findOneBy(['password' => "DISCORD|{$profileData['id']}"]);
 

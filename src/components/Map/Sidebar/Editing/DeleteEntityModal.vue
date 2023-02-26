@@ -39,10 +39,6 @@ export default {
     computed: {
         modalTitle() {
             let titleCaseEntityType = this.entityType[0].toUpperCase() + this.entityType.substr(1).toLowerCase();
-            if (this.entityType === 'disguise-area') {
-                // TODO localize
-                titleCaseEntityType = 'Disguise Area';
-            }
 
             return this.$t('map.confirm-item-deletion-title', { item: titleCaseEntityType });
         },
@@ -53,7 +49,7 @@ export default {
     methods: {
         doDelete() {
             this.deleteButtonBlocked = true;
-            const entityTypeForUrl = this.entityType === 'foliage' ? this.entityType : `${this.entityType}s`;
+            const entityTypeForUrl = `${this.entityType}s`;
 
             this.$http.delete(`${this.$domain}/api/${entityTypeForUrl}/${this.entity.id}`)
                 .then(_ => {

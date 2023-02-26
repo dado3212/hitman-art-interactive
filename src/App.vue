@@ -28,36 +28,6 @@
                                 <i class="fas fa-info-circle fa-stack-1x fa-inverse"></i>
                             </span>
                         </router-link>
-                        <a href="https://discord.gg/RssFsajjjX" target="_blank">
-                            <span class="fa-stack fa-2x" v-tooltip:top="$t('footer.join-the-discord')">
-                                <i class="fas fa-square fa-stack-2x"></i>
-                                <i class="fab fa-discord fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                        <a
-                            href="https://hitmanstat.us"
-                            target="_blank"
-                            data-toggle="tooltip">
-                            <span class="fa-stack fa-2x" v-tooltip:top="$t('footer.hitman-status')">
-                                <i class="fas fa-square fa-stack-2x"></i>
-                                <i class="fas fa-user-tie fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                        <a href="https://twitter.com/hitmapsOfficial" target="_blank">
-                            <span class="fa-stack fa-2x" v-tooltip:top="$t('footer.twitter')">
-                                <i class="fas fa-square fa-stack-2x"></i>
-                                <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
-                        <a href="https://www.patreon.com/mrmike227"
-                           target="_blank"
-                           data-toggle="tooltip"
-                           class="patreon-button">
-                            <span class="fa-stack fa-2x" v-tooltip:top="$t('footer.patreon')">
-                                <i class="fas fa-square fa-stack-2x"></i>
-                                <i class="fab fa-patreon fa-stack-1x fa-inverse"></i>
-                            </span>
-                        </a>
                     </div>
                 </div>
                 <div class="row legal">
@@ -79,27 +49,6 @@
                                 <i class="fas fa-user-secret"></i>
                                 {{ $t('authentication.privacy-policy') }}
                             </router-link>
-                        </span>
-                        |
-                        <span class="footer-link">
-                            <router-link :to="{ name: 'brand' }">
-                                <i class="fas fa-paint-brush"></i>
-                                Brand
-                            </router-link>
-                        </span>
-                        |
-                        <span class="footer-link">
-                            <router-link :to="{ name: 'support-the-site' }">
-                                <i class="fas fa-money-bill-alt"></i>
-                                {{ 'Support the Site' }}
-                            </router-link>
-                        </span>
-                        |
-                        <span class="footer-link">
-                            <a href="https://hitmaps.readme.io/reference" target="_blank">
-                                <i class="fas fa-code"></i>
-                                API
-                            </a>
                         </span>
                     </div>
                 </div>

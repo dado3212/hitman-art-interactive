@@ -29,15 +29,6 @@
                 <button class="navbar-toggler"
                         type="button"
                         data-toggle="collapse"
-                        data-target="#disguises-toggle"
-                        aria-controls="disguises-toggle"
-                        aria-expanded="false"
-                        aria-label="Toggle disguises box">
-                    <i class="far fa-fw fa-user-tie"></i>
-                </button>
-                <button class="navbar-toggler"
-                        type="button"
-                        data-toggle="collapse"
                         data-target="#floors-and-layers-toggle"
                         aria-controls="floors-and-layers-toggle"
                         aria-expanded="false"
@@ -110,13 +101,6 @@
                 <div class="navbar-collapse collapse show" id="search-item-toggle">
                     <item-search :searchable-nodes="getSearchableNodes()" @search-item="onSearchItem" />
                 </div>
-                <div class="collapse navbar-collapse" id="disguises-toggle">
-                    <disguise-dropdown :game="game"
-                                       :mission="mission"
-                                       :disguises="disguises"
-                                       :current-disguise="currentDisguise"
-                                       @disguise-selected="onDisguiseSelected" />
-                </div>
                 <div class="collapse navbar-collapse" id="floors-and-layers-toggle">
                     <hide-select-all @hide-all="$emit('hide-all')" @show-all="$emit('show-all')" />
                     <top-level-category-card v-for="topLevelCategory in topLevelCategories"
@@ -124,8 +108,6 @@
                                              :top-level-category-name="topLevelCategory"
                                              :categories="categories.filter(x => x.type === topLevelCategory)"
                                              :nodes="nodes.filter(x => x.type === topLevelCategory)"
-                                             :ledges="ledges"
-                                             :foliage="foliage"
                                              @hide-category="onHideCategory"
                                              @show-category="onShowCategory"
                                              @hide-top-level-category="onHideTopLevelCategory"
@@ -137,22 +119,6 @@
                           @launch-editor="onLaunchEditor" />
             <edit-items v-if="editorState === 'ITEMS'"
                         @launch-editor="onLaunchEditor" />
-            <edit-ledges v-if="editorState === 'LEDGES'"
-                         :drawing-active="drawingActive"
-                         @enable-ledge-creation="onEnableLedgeCreation"
-                         @launch-editor="onLaunchEditor" />
-            <edit-foliage v-if="editorState === 'FOLIAGE'"
-                          :drawing-active="drawingActive"
-                          @enable-foliage-creation="onEnableFoliageCreation"
-                          @launch-editor="onLaunchEditor" />
-            <edit-disguise-regions v-if="editorState === 'DISGUISE-REGIONS'"
-                                   :drawing-active="drawingActive"
-                                   :current-disguise="currentDisguise"
-                                   :disguises="disguises"
-                                   @disguise-selected="onDisguiseSelected"
-                                   @enable-region-creation="onEnableRegionCreation"
-                                   @launch-editor="onLaunchEditor"
-                                   @replace-disguise-areas="onReplaceDisguiseAreas" />
         </div>
     </nav>
 </template>
@@ -163,13 +129,9 @@ import ControlButton from "./ControlButton";
 import HideSelectAll from "./HideSelectAll";
 import TopLevelCategoryCard from "./TopLevelCategoryCard";
 import ItemSearch from "./ItemSearch";
-import DisguiseDropdown from "./DisguiseDropdown";
 import EditLanding from "./Editing/EditLanding";
 import EditorHeader from "./Editing/EditorHeader";
 import EditItems from "./Editing/EditItems";
-import EditFoliage from "./Editing/EditFoliage";
-import EditLedges from "./Editing/EditLedges";
-import EditDisguiseRegions from "./Editing/EditDisguiseRegions";
 import FloorToggle from "../FloorToggle";
 import MissionVariantSelector from "./MissionVariantSelector";
 import GameIcon from "../../GameIcon";
@@ -182,28 +144,21 @@ export default {
         GameIcon,
         MissionVariantSelector,
         FloorToggle,
-        EditDisguiseRegions,
-        EditLedges,
-        EditFoliage,
         EditItems,
         EditorHeader,
-        EditLanding, DisguiseDropdown, ItemSearch, TopLevelCategoryCard, HideSelectAll, ControlButton},
+        EditLanding, ItemSearch, TopLevelCategoryCard, HideSelectAll, ControlButton},
     props: {
         game: Object,
         mission: Object,
         loggedIn: Boolean,
         categories: Array,
         nodes: Array,
-        ledges: Array,
-        foliage: Array,
         topLevelCategories: Array,
-        disguises: Array,
         maxZoomLevel: Number,
         minZoomLevel: Number,
         currentZoomLevel: Number,
         editorState: String,
         drawingActive: Boolean,
-        currentDisguise: Object,
         currentVariant: Object
     },
     data() {
@@ -268,8 +223,25 @@ export default {
             return uniqueNodesBrokenDownByGroup;
         },
         beginDiscordLogin() {
-            this.$cookies.set('redirect-location', `${window.location.pathname}${window.location.search}`, '600s');
-            window.location.href = `https://discordapp.com/api/oauth2/authorize?client_id=681919936469401687&redirect_uri=${encodeURIComponent(this.$vueDomain)}/auth&response_type=token&scope=connections%20identify%20guilds%20email`;
+            // Temporary hack
+            this.$http.post(`${this.$domain}/api/web/user/login`, {
+                tokenType: 'df',
+                accessToken: 'df'
+            })
+                .then(e => {
+                    this.operationInProgress = false;
+                    this.$toast.success({
+                        message: 'Logged in!'
+                    });
+                    location.reload();
+                }).catch(e => {
+                    this.operationInProgress = false;
+                    this.$toast.error({
+                        message: e
+                    });
+                });
+            // this.$cookies.set('redirect-location', `${window.location.pathname}${window.location.search}`, '600s');
+            // window.location.href = `https://discordapp.com/api/oauth2/authorize?client_id=681919936469401687&redirect_uri=${encodeURIComponent(this.$vueDomain)}/auth&response_type=token&scope=connections%20identify%20guilds%20email`;
         },
         logout: function() {
             localStorage.removeItem('token');
@@ -293,21 +265,6 @@ export default {
         },
         onLaunchEditor(editor) {
             this.$emit('launch-editor', editor);
-        },
-        onEnableLedgeCreation() {
-            this.$emit('enable-ledge-creation');
-        },
-        onEnableFoliageCreation() {
-            this.$emit('enable-foliage-creation');
-        },
-        onDisguiseSelected(disguise) {
-            this.$emit('disguise-selected', disguise);
-        },
-        onEnableRegionCreation(regionType) {
-            this.$emit('enable-region-creation', regionType);
-        },
-        onReplaceDisguiseAreas(disguiseAreas) {
-            this.$emit('replace-disguise-areas', disguiseAreas);
         },
         onChangeFloor(floorNumber) {
             this.$emit('change-floor', floorNumber);

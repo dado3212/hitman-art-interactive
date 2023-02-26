@@ -68,8 +68,6 @@ export default {
         topLevelCategoryName: String,
         categories: Array,
         nodes: Array,
-        ledges: Array,
-        foliage: Array
     },
     data() {
         return {
@@ -78,12 +76,7 @@ export default {
     },
     methods: {
         areAllNodesHiddenForTopLevelCategory() {
-            let polysVisible = false;
-            if (this.topLevelCategoryName === 'Navigation') {
-                polysVisible = this.ledges.some(ledge => ledge.visible) || this.foliage.some(foliage => foliage.visible);
-            }
-
-            return !polysVisible && !this.nodes.some(node => node.visible && !node.searchResult);
+            return !this.nodes.some(node => node.visible && !node.searchResult);
         },
         onTopLevelClick() {
             if (this.areAllNodesHiddenForTopLevelCategory()) {
@@ -100,13 +93,6 @@ export default {
             }
         },
         isCategoryHidden(category) {
-            if (category.subgroup === 'ledge') {
-                return !this.ledges.some(ledge => ledge.visible);
-            }
-            if (category.subgroup === 'foliage') {
-                return !this.foliage.some(foliage => foliage.visible);
-            }
-
             return !this.nodes.some(node => node.group === category.group && node.visible && !node.searchResult);
         },
         buildCollapsibleId(category) {
@@ -114,13 +100,6 @@ export default {
             return `collapsible-${this.uid}-${categoryName}`
         },
         getItemsForCategory(category) {
-            if (category.subgroup === 'ledge') {
-                return this.ledges;
-            }
-            if (category.subgroup === 'foliage') {
-                return this.foliage;
-            }
-
             return this.nodes.filter(node => node.subgroup === category.subgroup);
         },
         noDuplicates: function(val) {
@@ -227,10 +206,6 @@ export default {
                 text-decoration: none;
                 background: #33363a;
             }
-        }
-
-        &#header-disguises {
-            margin-bottom: 0;
         }
     }
 

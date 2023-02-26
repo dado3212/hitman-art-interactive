@@ -133,8 +133,7 @@ export default {
         }
     }
 
-    #clear-search.control-button,
-    #clear-disguise-search.control-button {
+    #clear-search.control-button {
         display: inline-block;
         margin-left: 11px;
         height: 40px;

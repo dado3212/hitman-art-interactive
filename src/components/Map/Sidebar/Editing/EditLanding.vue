@@ -7,26 +7,6 @@
                 {{ $t('map.add-remove-items') }}
             </h3>
         </div>
-        <div v-if="!nodesOnly" class="editor-button" @click="$emit('launch-editor', 'LEDGES')">
-            <h3>
-                <i class="fas fa-fw fa-bezier-curve"></i>
-                {{ $t('map.add-remove-ledges') }}
-            </h3>
-        </div>
-        <div v-if="!nodesOnly" class="editor-button" @click="$emit('launch-editor', 'FOLIAGE')">
-            <h3>
-                <i class="fas fa-fw fa-leaf"></i>
-                {{ $t('map.add-remove-foliage') }}
-            </h3>
-        </div>
-        <div v-if="!nodesOnly"
-             class="editor-button"
-             @click="$emit('launch-editor', 'DISGUISE-REGIONS')">
-            <h3>
-                <i class="fas fa-fw fa-user-tie"></i>
-                {{ $t('map.manage-disguise-areas') }}
-            </h3>
-        </div>
         <i18n path="map.click-icon-to-close" tag="p">
             <span slot="pencilIcon">
                 <i class="fas fa-pencil-alt"></i>
@@ -46,10 +26,7 @@ export default {
 
 <style lang="scss" scoped>
 .edit-menu,
-.items-menu,
-.ledges-menu,
-.foliage-menu,
-.disguise-trespassing-menu {
+.items-menu {
     h2 {
         color: #fff;
         text-transform: uppercase;

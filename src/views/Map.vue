@@ -19,15 +19,10 @@
                      :top-level-categories="topLevelCategories"
                      :categories="categories"
                      :nodes="nodes"
-                     :ledges="ledges"
-                     :foliage="foliage"
-                     :disguises="disguises"
                      :max-zoom-level="mission.maxZoom"
                      :min-zoom-level="mission.minZoom"
                      :current-zoom-level="map.getZoom()"
                      :editor-state="editorState"
-                     :drawing-active="polyActive"
-                     :current-disguise="currentDisguise"
                      :current-variant="currentVariant"
                      @hide-all="onHideAll"
                      @show-all="onShowAll"
@@ -40,11 +35,6 @@
                      @zoom-out="onZoomOut"
                      @master-edit-toggle="onMasterEditToggle"
                      @launch-editor="onLaunchEditor"
-                     @enable-ledge-creation="onEnableLedgeCreation"
-                     @enable-foliage-creation="onEnableFoliageCreation"
-                     @enable-region-creation="onEnableDisguiseRegionCreation"
-                     @disguise-selected="onDisguiseSelected"
-                     @replace-disguise-areas="onReplaceDisguiseAreas"
                      @variant-selected="onVariantSelected" />
             <node-popup :node="nodeForModal"
                         :logged-in="loggedIn"
@@ -63,8 +53,6 @@
                                  :mission="mission"
                                  @item-created="onItemCreated"
                                  @item-updated="onItemUpdated" />
-            <delete-entity-modal :entity="deletionItem" :entity-type="deletionItemType" @item-deleted="onPolyDeleted" />
-            <manage-disguise-area-modal :entity="deletionItem" @item-deleted="onPolyDeleted" @item-converted="onDisguiseAreaConverted" />
             <move-node-modal :node="nodeForMoving" />
         </div>
     </div>
@@ -80,12 +68,10 @@
     import ArrayHelpers from "../components/ArrayHelpers";
     import DeleteEntityModal from "../components/Map/Sidebar/Editing/DeleteEntityModal";
     import MoveNodeModal from "../components/Map/Sidebar/Editing/MoveNodeModal";
-    import ManageDisguiseAreaModal from "../components/Map/Sidebar/Editing/ManageDisguiseAreaModal";
 
     export default {
         name: 'Map',
         components: {
-            ManageDisguiseAreaModal,
             MoveNodeModal,
             DeleteEntityModal,
             AddEditItemModal,
@@ -106,10 +92,6 @@
                 nodes: [],
                 categories: [],
                 topLevelCategories: [],
-                disguises: [],
-                disguiseAreas: {},
-                ledges: [],
-                foliage: [],
                 //region Map-specific
                 currentFloor: 0,
                 map: null,
@@ -120,12 +102,10 @@
                 clickedPoint: null,
                 vertices: [],
                 workingLayer: null,
-                currentDisguise: null,
                 currentVariant: null,
                 //endregion
                 //region Editor-specific
                 editorState: 'OFF',
-                disguiseRegionType: null,
                 polyActive: false,
                 deletionItem: null,
                 deletionItemType: null
@@ -195,45 +175,16 @@
                             this.nodes.forEach(node => node.marker.addTo(this.map));
                         });
                     });
-
-                const disguisesPromise = this.$http.get(
-                    `${this.$domain}/api/v2/games/${this.$route.params.game}`+
-                                              `/locations/${this.$route.params.location}`+
-                                              `/missions/${this.$route.params.mission}/disguises`)
-                    .then(resp => this.disguises = resp.data.disguises);
-
-                const ledgesPromise = this.$http.get(
-                    `${this.$domain}/api/v2/games/${this.$route.params.game}`+
-                                              `/locations/${this.$route.params.location}`+
-                                              `/missions/${this.$route.params.mission}/ledges`)
-                    .then(resp => {
-                        this.ledges = resp.data.ledges;
-                        this.ledges.forEach(ledge => this.buildLedgeForMap(ledge));
-
-                        this.$nextTick(_ => this.ledges.forEach(ledge => ledge.polyline.addTo(this.map)));
-                    });
-                const foliagePromise = this.$http.get(
-                    `${this.$domain}/api/v2/games/${this.$route.params.game}`+
-                                              `/locations/${this.$route.params.location}`+
-                                              `/missions/${this.$route.params.mission}/foliage`)
-                    .then(resp => {
-                        this.foliage = resp.data.foliage;
-                        this.foliage.forEach(foliage => this.buildFoliageForMap(foliage));
-
-                        this.$nextTick(_ => this.foliage.forEach(foliage => foliage.polygon.addTo(this.map)));
-                    });
                 //@formatter:on
 
-                Promise.all([nodesPromise, disguisesPromise, ledgesPromise, foliagePromise]).then(_ => {
+                Promise.all([nodesPromise]).then(_ => {
                     this.$nextTick(() => {
                         this.updateActiveMapState();
                         this.mapDataLoaded = true;
 
                         // Bind map listeners
                         this.map.on('click', this.addMarker);
-                        this.map.on('pm:drawstart', this.initDraw);
                         this.map.on('pm:create', this.pmLayer);
-                        this.map.on('pm:drawend', this.endDraw);
                         this.map.on('zoomend', () => {
                             let zoomLevel = this.map.getZoom();
 
@@ -313,73 +264,6 @@
 
                 this.bindTooltip(node);
             },
-            buildLedgeForMap(ledge) {
-                ledge.visible = true;
-                const formattedVertices = ledge.vertices.map(vertexPair => [vertexPair.split(',')[0], vertexPair.split(',')[1]]);
-                ledge.polyline = L.polyline(formattedVertices, {
-                    color: '#fff',
-                    weight: 4,
-                    opacity: .75,
-                    custom: {
-                        id: ledge.id
-                    }
-                }).bindTooltip(this.$t('map.groups.Navigation|Ledge'), {sticky: true})
-                    .on('click', () => this.displayConfirmPolyDeletionModal(ledge, 'ledge'));
-
-                return ledge;
-            },
-            displayConfirmPolyDeletionModal(ledgeFoliage, type) {
-                // Can't delete either if their respective editor isn't enabled
-                if (!((this.editorState === 'LEDGES' && type === 'ledge') ||
-                    (this.editorState === 'FOLIAGE' && type === 'foliage') ||
-                    (this.editorState === 'DISGUISE-REGIONS' && type === 'disguise-area'))) {
-                    return;
-                }
-
-                if (this.editorState === 'LEDGES') {
-                    this.deletionItemType = 'ledge';
-                } else if (this.editorState === 'FOLIAGE') {
-                    this.deletionItemType = 'foliage';
-                } else if (this.editorState === 'DISGUISE-REGIONS') {
-                    this.deletionItemType = 'disguise-area';
-                } else {
-                    return;
-                }
-
-                this.deletionItem = ledgeFoliage;
-
-                if (this.editorState === 'DISGUISE-REGIONS') {
-                    this.$nextTick(() => $('#manage-disguise-area-modal').modal('show'));
-                } else {
-                    this.$nextTick(() => $('#delete-entity').modal('show'));
-                }
-            },
-            buildFoliageForMap(foliage) {
-                foliage.visible = true;
-                const formattedVertices = foliage.vertices.map(vertexPair => [vertexPair.split(',')[0], vertexPair.split(',')[1]]);
-                foliage.polygon = L.polygon(formattedVertices, {
-                    color: '#248f24',
-                    weight: 4,
-                    opacity: .75,
-                    custom: {
-                        id: foliage.id
-                    }
-                }).bindTooltip(this.$t('map.groups.Navigation|Foliage'), {sticky: true}).on('click', () => this.displayConfirmPolyDeletionModal(foliage, 'foliage'));
-
-                return foliage;
-            },
-            buildDisguiseAreaForMap(disguiseArea) {
-                const formattedVertices = disguiseArea.vertices.map(vertexPair => [vertexPair.split(',')[0], vertexPair.split(',')[1]]);
-                disguiseArea.polygon = L.polygon(formattedVertices, {
-                    color: disguiseArea.type === 'trespassing' ? 'yellow' : '#f00',
-                    stroke: false,
-                    weight: 4,
-                    opacity: .75
-                }).bindTooltip(disguiseArea.type === 'trespassing' ? this.$t('map.trespassing') : this.$t('map.hostile-area'), {sticky: true})
-                    .on('click', () => this.displayConfirmPolyDeletionModal(disguiseArea, 'disguise-area'));
-
-                return disguiseArea;
-            },
             buildMapLayers() {
                 const allLayers = {};
                 // 1. Sniper Assassin (only one level - 0)
@@ -411,7 +295,6 @@
             },
             updateActiveMapState() {
                 this.updateActiveMapLayer();
-                this.updateActiveDisguiseLayer();
                 this.updateNodeMarkers();
             },
             updateActiveMapLayer() {
@@ -421,25 +304,9 @@
                 // 2. Activate the current one
                 this.map.addLayer(this.mapLayers[this.currentFloor]);
             },
-            updateActiveDisguiseLayer(oldDisguise) {
-                // 1. Remove old disguise if need be
-                if (oldDisguise) {
-                    this.disguiseAreas[oldDisguise.id].forEach(area => area.polygon.removeFrom(this.map));
-                }
-
-                if (this.currentDisguise) {
-                    // 2. Remove all current disguise layers for the current disguise
-                    this.disguiseAreas[this.currentDisguise.id].forEach(area => area.polygon.removeFrom(this.map));
-
-                    // 3. Add current disguise layers for the current disguise + level
-                    this.disguiseAreas[this.currentDisguise.id].filter(area => area.level === this.currentFloor).forEach(area => area.polygon.addTo(this.map));
-                }
-            },
             updateNodeMarkers() {
                 // 1. Remove all items from the map
                 this.nodes.forEach(node => node.marker._icon.style.display = 'none');
-                this.ledges.forEach(ledge => ledge.polyline.removeFrom(this.map));
-                this.foliage.forEach(foliage => foliage.polygon.removeFrom(this.map));
 
                 // 3. [OVERRIDE] Mark nodes as "visible" if they are part of a search result
                 this.nodes.filter(node => node.searchResult).forEach(node => node.visible = true);
@@ -454,12 +321,6 @@
                         node.marker._icon.classList.remove('search-result');
                     }
                 });
-
-                // 5. Handle showing/hiding ledges/foliage
-                this.ledges.filter(ledge => ledge.level === this.currentFloor && ledge.visible)
-                    .forEach(ledge => ledge.polyline.addTo(this.map));
-                this.foliage.filter(foliage => foliage.level === this.currentFloor && foliage.visible)
-                    .forEach(foliage => foliage.polygon.addTo(this.map));
 
                 // Make sure the counters and highlights for the level select are updated
                 if (this.$refs.floorToggle) {
@@ -584,14 +445,10 @@
             },
             onHideAll() {
                 this.nodes.forEach(node => node.visible = false);
-                this.ledges.forEach(ledge => ledge.visible = false);
-                this.foliage.forEach(foliage => foliage.visible = false);
                 this.updateActiveMapState();
             },
             onShowAll() {
                 this.nodes.forEach(node => node.visible = true);
-                this.ledges.forEach(ledge => ledge.visible = true);
-                this.foliage.forEach(foliage => foliage.visible = true);
                 this.updateActiveMapState();
             },
             onSearchItem(itemKey) {
@@ -605,44 +462,22 @@
                 this.updateNodeMarkers();
             },
             onHideCategory(category) {
-                if (category.subgroup === 'ledge') {
-                    this.ledges.forEach(ledge => ledge.visible = false);
-                } else if (category.subgroup === 'foliage') {
-                    this.foliage.forEach(foliage => foliage.visible = false);
-                } else {
-                    this.nodes.filter(node => node.type === category.type && node.group === category.group).forEach(node => node.visible = false);
-                }
+                this.nodes.filter(node => node.type === category.type && node.group === category.group).forEach(node => node.visible = false);
 
                 this.updateNodeMarkers();
             },
             onShowCategory(category) {
-                if (category.subgroup === 'ledge') {
-                    this.ledges.forEach(ledge => ledge.visible = true);
-                } else if (category.subgroup === 'foliage') {
-                    this.foliage.forEach(foliage => foliage.visible = true);
-                } else {
-                    this.nodes.filter(node => node.type === category.type && node.group === category.group).forEach(node => node.visible = true);
-                }
+                this.nodes.filter(node => node.type === category.type && node.group === category.group).forEach(node => node.visible = true);
 
                 this.updateNodeMarkers();
             },
             onHideTopLevelCategory(type) {
                 this.nodes.filter(node => node.type === type).forEach(node => node.visible = false);
 
-                if (type === 'Navigation') {
-                    this.ledges.forEach(ledge => ledge.visible = false);
-                    this.foliage.forEach(foliage => foliage.visible = false);
-                }
-
                 this.updateNodeMarkers();
             },
             onShowTopLevelCategory(type) {
                 this.nodes.filter(node => node.type === type).forEach(node => node.visible = true);
-
-                if (type === 'Navigation') {
-                    this.ledges.forEach(ledge => ledge.visible = true);
-                    this.foliage.forEach(foliage => foliage.visible = true);
-                }
 
                 this.updateNodeMarkers();
             },
@@ -657,16 +492,11 @@
                     this.editorState = 'MENU';
                 } else {
                     this.editorState = 'OFF';
-                    this.toggleDraw('OFF');
                     this.nodes.forEach(node => node.marker.dragging.disable());
                 }
             },
             onLaunchEditor(editorState) {
                 this.editorState = editorState;
-
-                if (this.editorState === 'MENU') {
-                    this.toggleDraw('OFF');
-                }
 
                 // Update node "draggability"
                 if (this.editorState === 'ITEMS') {
@@ -675,191 +505,8 @@
                     this.nodes.forEach(node => node.marker.dragging.disable());
                 }
             },
-            toggleDraw(state) {
-                if (state === 'OFF') {
-                    this.map.pm.disableDraw('Line');
-                    this.map.pm.disableDraw('Polygon');
-                    return;
-                }
-
-                if (this.map.pm.Draw[state]._enabled) {
-                    this.map.pm.disableDraw(state);
-                    this.polyActive = false;
-                } else {
-                    this.map.pm.enableDraw(state, {
-                        snappable: false
-                    });
-                    this.polyActive = true;
-                }
-
-                let toastMessage = this.polyActive ? 'Drawing tools enabled' : 'Drawing tools disabled';
-                this.$toast.info({
-                    message: toastMessage
-                })
-            },
-            onEnableLedgeCreation() {
-                this.toggleDraw('Line');
-            },
-            onEnableFoliageCreation() {
-                this.toggleDraw('Polygon');
-            },
-            onEnableDisguiseRegionCreation(regionType) {
-                if (this.disguiseRegionType !== null && this.disguiseRegionType !== regionType) {
-                    // We'll need to disable and re-enable to switch type
-                    this.toggleDraw('Polygon');
-                }
-                if (this.disguiseRegionType !== null && this.disguiseRegionType === regionType) {
-                    // Toggline the same one disables, so just null it out.
-                    this.disguiseRegionType = null;
-                } else {
-                    this.disguiseRegionType = regionType;
-                }
-
-                this.toggleDraw('Polygon');
-            },
-            initDraw: function(e) {
-                e.workingLayer.on('pm:vertexadded', e => {
-                    this.vertices.push([e.latlng.lat, e.latlng.lng])
-                })
-            },
             pmLayer: function(e) {
                 this.workingLayer = e.layer;
-            },
-            endDraw: function(e) {
-                if (this.vertices.length === 0) {
-                    return;
-                }
-
-                const data = {
-                    vertices: [],
-                    missionId: this.mission.id,
-                    level: this.currentFloor
-                };
-                this.vertices.forEach(element => {
-                    data.vertices.push(`${element[0]},${element[1]}`);
-                });
-                if (e.shape === 'Line') {
-                    this.$http.post(`${this.$domain}/api/ledges`, data)
-                        .then(resp => {
-                            this.vertices = [];
-                            this.ledges.push(this.buildLedgeForMap(resp.data.data));
-                            this.$toast.success({
-                                message: 'Ledge saved!'
-                            });
-                            this.map.removeLayer(this.workingLayer);
-                            this.workingLayer = null;
-                            this.polyActive = false;
-                            this.updateNodeMarkers();
-                        }).catch(_ => {
-                            this.$toast.error({
-                                message: 'Error occurred when saving ledge!'
-                            });
-                        });
-                } else if (this.editorState === 'FOLIAGE') {
-                    this.$http.post(`${this.$domain}/api/foliage`, data)
-                        .then(resp => {
-                            this.vertices = [];
-                            this.foliage.push(this.buildFoliageForMap(resp.data.data));
-                            this.$toast.success({
-                                message: 'Foliage saved!'
-                            });
-                            this.map.removeLayer(this.workingLayer);
-                            this.workingLayer = null;
-                            this.polyActive = false;
-                            this.updateNodeMarkers();
-                        }).catch(_ => {
-                            this.$toast.error({
-                                message: 'Error occurred when saving foliage!'
-                            });
-                        });
-                } else if (this.editorState === 'DISGUISE-REGIONS') {
-                    data.disguiseId = this.currentDisguise.id;
-                    data.type = this.disguiseRegionType;
-
-                    this.$http.post(`${this.$domain}/api/disguise-areas`, data).then(resp => {
-                        this.vertices = [];
-                        this.disguiseAreas[this.currentDisguise.id].push(this.buildDisguiseAreaForMap(resp.data.data));
-                        this.$toast.success({
-                            message: 'Disguise area saved!'
-                        });
-                        this.map.removeLayer(this.workingLayer);
-                        this.workingLayer = null;
-                        this.polyActive = false;
-                        this.disguiseRegionType = null;
-                        this.updateActiveDisguiseLayer();
-                    }).catch(err => {
-                        console.error(err);
-                        this.$toast.error({
-                            message: 'Error occurred when saving disguise area!'
-                        });
-                    });
-                }
-            },
-            onPolyDeleted() {
-                if (this.deletionItemType === 'ledge') {
-                    this.deletionItem.polyline.removeFrom(this.map);
-                    ArrayHelpers.deleteElement(this.ledges, this.deletionItem);
-                } else if (this.deletionItemType === 'foliage') {
-                    this.deletionItem.polygon.removeFrom(this.map);
-                    ArrayHelpers.deleteElement(this.foliage, this.deletionItem);
-                } else if (this.deletionItemType === 'disguise-area') {
-                    this.deletionItem.polygon.removeFrom(this.map);
-                    ArrayHelpers.deleteElement(this.disguiseAreas[this.currentDisguise.id], this.deletionItem);
-                }
-
-                this.deletionItemType = null;
-                this.deletionItem = null;
-                this.updateNodeMarkers();
-                $('#delete-entity').modal('hide');
-                $('#manage-disguise-area-modal').modal('hide');
-            },
-            onDisguiseAreaConverted() {
-                this.deletionItem.polygon.removeFrom(this.map);
-                this.deletionItem.type = this.deletionItem.type === 'trespassing' ? 'hostile' : 'trespassing';
-                this.disguiseAreas[this.currentDisguise.id].push(this.buildDisguiseAreaForMap(this.deletionItem));
-                this.deletionItemType = null;
-                this.deletionItem = null;
-                this.updateNodeMarkers();
-                this.updateActiveDisguiseLayer();
-                $('#manage-disguise-area-modal').modal('hide');
-            },
-            onDisguiseSelected(disguise) {
-                // Disable disguise editor tools if they're enabled. You can't change a disguise mid-polygon.
-                if (this.disguiseRegionType) {
-                    this.onEnableDisguiseRegionCreation(this.disguiseRegionType);
-                }
-
-                if (disguise === 'NONE' || this.disguiseAreas[disguise.id]) {
-                    this.currentDisguise = disguise === 'NONE' ? null : disguise;
-                    return;
-                }
-
-                this.$http.get(`${this.$domain}/api/v2/games/${this.$route.params.game}`+
-                                                         `/locations/${this.$route.params.location}`+
-                                                         `/missions/${this.$route.params.mission}` +
-                                                         `/disguise-areas/${disguise.id}`)
-                    .then(resp => {
-                        this.disguiseAreas[disguise.id] = resp.data.disguiseAreas;
-                        this.disguiseAreas[disguise.id].forEach(area => this.buildDisguiseAreaForMap(area));
-                        this.currentDisguise = disguise;
-                    }).catch(err => {
-                        console.error(err);
-                        this.$toast.error({
-                            message: 'Failed to retrieve disguise regions!'
-                        });
-                    });
-            },
-            onReplaceDisguiseAreas(disguiseAreas) {
-                if (!disguiseAreas.length) {
-                    // No actual regions, so nothing to do
-                    return;
-                }
-
-                const disguiseId = disguiseAreas[0].disguiseId;
-                this.disguiseAreas[disguiseId].forEach(area => area.polygon.removeFrom(this.map));
-                this.disguiseAreas[disguiseId] = disguiseAreas;
-                this.disguiseAreas[disguiseId].forEach(area => this.buildDisguiseAreaForMap(area));
-                this.updateActiveDisguiseLayer();
             },
             onVariantSelected(variant) {
                 this.currentVariant = variant;
@@ -875,13 +522,6 @@
 
                 this.updateActiveMapState();
             },
-            currentDisguise(_, old) {
-                if (!this.map) {
-                    return;
-                }
-
-                this.updateActiveDisguiseLayer(old);
-            }
         }
     };
 </script>
