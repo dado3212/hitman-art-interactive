@@ -57,7 +57,30 @@ Create a database `hitman_art_interactive` with the collation `utf8mb4_unicode_c
 
 `mysql --user=<user> --password=<password> --database=hitman_art_interactive --default-character-set=utf8mb4 < import.sql`
 
-`DROP TABLE elusive_targets; DROP TABLE redacted_data; DROP TABLE roulette_matchups; DROP TABLE roulette_messages; DROP TABLE roulette_objectives; DROP TABLE spin_history; DROP TABLE phinxlog; DROP TABLE disguises; DROP TABLE disguise_areas; DROP TABLE disguise_to_ioi_guid; DROP TABLE foliage; DROP TABLE ledges;`
+`DROP TABLE elusive_targets; DROP TABLE redacted_data; DROP TABLE roulette_matchups; DROP TABLE roulette_messages; DROP TABLE roulette_objectives; DROP TABLE spin_history; DROP TABLE phinxlog; DROP TABLE disguises; DROP TABLE disguise_areas; DROP TABLE disguise_to_ioi_guid; DROP TABLE foliage; DROP TABLE ledges; DROP TABLE item_to_ioi_grid; DROP TABLE mission_to_difficulties;`
+
+```
+# Command to prune old nodes (other than navigation)
+DELETE FROM nodes WHERE NOT (`type` = 'Navigation' AND `subgroup` IN ('exit-location', 'up-stair', 'area', 'starting-location', 'down-stair', 'up-down-stair'));
+DELETE FROM items;
+
+# To get the node categories that are actually used
+SELECT DISTINCT node_categories.id
+FROM node_categories
+INNER JOIN nodes ON node_categories.`type` = nodes.`type` AND node_categories.`group` = nodes.`group` AND node_categories.subgroup = nodes.subgroup
+DELETE FROM node_categories WHERE id NOT IN (20, 21, 23, 47);
+
+# Clean up node notes
+DELETE
+FROM node_notes
+WHERE node_id NOT IN (
+SELECT id FROM nodes)
+
+# Clean up from 
+DELETE
+FROM icons
+WHERE `group` IN ('Points of Interest', 'Weapons and Tools')
+```
 
 # Legal
 HITMAN™, HITMAN™ 2, the HITMAN™ logo, images, and text are the property of IO Interactive.

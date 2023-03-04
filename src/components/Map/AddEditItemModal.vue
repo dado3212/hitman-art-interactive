@@ -111,21 +111,6 @@
                             </small>
                         </div>
                     </div>
-                    <div class="form-group row">
-                        <label :for="`${uid}-quantity`" class="col-sm-2 col-form-label">
-                            {{ $t('map.quantity') }}
-                        </label>
-                        <div class="col-sm-10">
-                            <select name="quantity"
-                                    :id="`${uid}-quantity`"
-                                    v-model="createEditNodeModel.quantity"
-                                    class="form-control">
-                                <option v-for="n in 10" :value="n">
-                                    {{ n }}
-                                </option>
-                            </select>
-                        </div>
-                    </div>
                     <div class="form-group row" v-if="currentCategory.requireAction">
                         <label :for="`${uid}-action`" class="col-sm-2 col-form-label">
                             {{ $t('map.action') }}
@@ -168,6 +153,21 @@
                                    class="form-control">
                             <small class="form-text text-muted">
                                 {{ $t('map.image-url-note') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label :for="`${uid}-objectHash`" class="col-sm-2 col-form-label">
+                            {{ $t('map.objectHash') }}
+                        </label>
+                        <div class="col-sm-10">
+                            <input type="text"
+                                   name="objectHash"
+                                   :id="`${uid}-objectHash`"
+                                   v-model="createEditNodeModel.objectHash"
+                                   class="form-control">
+                            <small class="form-text text-muted">
+                                {{ $t('map.objectHash') }}
                             </small>
                         </div>
                     </div>
@@ -293,7 +293,7 @@ export default {
                 category: null,
                 icon: '',
                 name: '',
-                quantity: 1,
+                objectHash: '',
                 targetAction: '',
                 image: '',
                 notes: [],
@@ -303,7 +303,7 @@ export default {
                 category: null,
                 icon: '',
                 name: '',
-                quantity: 1,
+                objectHash: '',
                 targetAction: '',
                 image: '',
                 notes: [],
@@ -359,7 +359,7 @@ export default {
                 this.createEditNodeModel.icon = this.node.icon;
                 $(this.$refs.iconPicker).selectpicker('val', this.createEditNodeModel.icon);
                 this.createEditNodeModel.name = this.node.name;
-                this.createEditNodeModel.quantity = this.node.quantity;
+                this.createEditNodeModel.objectHash = this.node.objectHash;
                 this.createEditNodeModel.targetAction = this.node.target;
                 this.createEditNodeModel.image = this.node.image;
                 this.createEditNodeModel.notes = this.node.notes.map(note => {
@@ -416,7 +416,7 @@ export default {
 
             this.createEditNodeModel.name = currentTemplate.name;
             this.createEditNodeModel.targetAction = currentTemplate.target;
-            this.createEditNodeModel.quantity = 1;
+            this.createEditNodeModel.objectHash = '';
             this.createEditNodeModel.image = currentTemplate.image;
             this.createEditNodeModel.icon = currentTemplate.icon;
             this.createEditNodeModel.category = this.categories.find(category => category.type === currentTemplate.type && category.subgroup === currentTemplate.subgroup);
@@ -465,7 +465,7 @@ export default {
                 icon: this.createEditNodeModel.icon,
                 category: this.createEditNodeModel.category,
                 name: this.createEditNodeModel.name,
-                quantity: this.createEditNodeModel.quantity,
+                objectHash: this.createEditNodeModel.objectHash,
                 targetAction: this.createEditNodeModel.targetAction,
                 level: this.currentLevel,
                 latitude: this.clickedPoint.lat,
@@ -490,7 +490,7 @@ export default {
                 icon: this.createEditNodeModel.icon,
                 category: this.createEditNodeModel.category,
                 name: this.createEditNodeModel.name,
-                quantity: this.createEditNodeModel.quantity,
+                objectHash: this.createEditNodeModel.objectHash,
                 targetAction: this.createEditNodeModel.targetAction,
                 level: this.currentLevel,
                 latitude: this.node.latitude,

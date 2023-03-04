@@ -91,9 +91,6 @@ class NodeCategory {
      */
     public $forSniperAssassin;
 
-    // Only for the editor
-    public $defaultQuantity = 1;
-
     /**
      * @return mixed
      */

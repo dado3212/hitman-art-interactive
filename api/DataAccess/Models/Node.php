@@ -94,9 +94,9 @@ class Node {
     public $image;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", nullable=true,  name="object_hash")
      */
-    public $quantity;
+    public $objectHash;
 
     /**
      * @ORM\ManyToMany(targetEntity="MissionVariant", cascade={"persist"})
@@ -344,15 +344,15 @@ class Node {
     /**
      * @return mixed
      */
-    public function getQuantity(): int {
-        return $this->quantity;
+    public function getObjectHash(): string {
+        return $this->objectHash;
     }
 
     /**
-     * @param mixed $quantity
+     * @param mixed $objectHash
      */
-    public function setQuantity(int $quantity): void {
-        $this->quantity = $quantity;
+    public function setObjectHash(string $objectHash): void {
+        $this->objectHash = $objectHash;
     }
 
     /**

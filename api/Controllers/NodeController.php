@@ -47,8 +47,7 @@ class NodeController {
         $nodesWithNotes = $this->nodeRepository->findByMission($missionid);
 
         $groups = [
-            'Points of Interest' => new TopLevelCategoryViewModel('Points of Interest'),
-            'Weapons and Tools' => new TopLevelCategoryViewModel('Weapons and Tools'),
+            'Wall Hangings' => new TopLevelCategoryViewModel('Wall Hangings'),
             'Navigation' => new TopLevelCategoryViewModel('Navigation'),
         ];
 
@@ -128,7 +127,7 @@ class NodeController {
                 $nodeViewModel->group = $node->getGroup();
                 $nodeViewModel->image = $node->getImage();
                 $nodeViewModel->tooltip = $node->getName() ?? '';
-                $nodeViewModel->quantity = $node->getQuantity();
+                $nodeViewModel->objectHash = $node->getObjectHash();
 
                 $categoryViewModel = $groups[$type]->items[$group];
                 $categoryViewModel->items[] = $nodeViewModel;
@@ -179,7 +178,7 @@ class NodeController {
             $nodeViewModel->group = $node['group'];
             $nodeViewModel->image = $node['image'];
             unset($nodeViewModel->tooltip);
-            $nodeViewModel->quantity = $node['quantity'];
+            $nodeViewModel->objectHash = $node['objectHash'];
 
             foreach ($node['variants'] as $missionVariant) {
                 $nodeViewModel->variants[] = $missionVariant['id'];
@@ -234,7 +233,7 @@ class NodeController {
             $node->setImage(null);
         }
 
-        $node->setQuantity($requestBody['quantity'] ?? 1);
+        $node->setObjectHash($requestBody['objectHash']);
 
         /* @var $mission Mission */
         $mission = $this->entityManager->getRepository(Mission::class)->findOneBy(['id' => $missionId]);

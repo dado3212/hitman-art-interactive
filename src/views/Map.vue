@@ -375,10 +375,6 @@
                     return;
                 }
 
-                if (node.quantity > 1) {
-                    tooltip += ` (x${node.quantity})`;
-                }
-
                 node.marker.bindTooltip(tooltip.replace(/&/g, "&amp;")
                     .replace(/</g, "&lt;")
                     .replace(/>/g, "&gt;")

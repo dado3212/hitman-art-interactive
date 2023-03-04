@@ -254,8 +254,7 @@ $klein->respond('GET', '/api/v2/games/[:game]/locations/[:location]/missions/[:m
 
     return $response->json([
         'topLevelCategories' => [
-            'Points of Interest',
-            'Weapons and Tools',
+            'Wall Hangings',
             'Navigation'
         ],
         'nodes' => $nodes,
@@ -420,7 +419,7 @@ function transformNode(Node $node): NodeWithNotesViewModel {
     $nodeViewModel->group = $node->getGroup();
     $nodeViewModel->image = $node->getImage();
     unset($nodeViewModel->tooltip);
-    $nodeViewModel->quantity = $node->getQuantity();
+    $nodeViewModel->objectHash = $node->getObjectHash();
 
     /* @var $missionVariant MissionVariant */
     foreach ($node->getVariants()->toArray() as $missionVariant) {

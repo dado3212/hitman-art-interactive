@@ -22,7 +22,7 @@ class NodeWithNotesViewModel {
     public $approved;
     public $image;
     public $tooltip;
-    public $quantity;
+    public $objectHash;
     public $searchable;
     public $variants = [];
 }
