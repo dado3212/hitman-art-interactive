@@ -4,6 +4,9 @@
             <div class="image" v-if="node.image">
                 <img :src="node.image" class="img-fluid">
             </div>
+            <div class="image" v-if="node.objectHash">
+                <img :src="getObjectHashUrl" class="img-fluid">
+            </div>
             <div class="details" :class="node.image ? '' : 'no-image'">
                 <div class="icon-and-details">
                     <div class="icon" v-if="fontIconForNodeSubgroup !== 'corrupt'">
@@ -87,6 +90,9 @@ export default {
         },
         descriptionNote() {
             return this.node.notes.find(node => node.type === 'description');
+        },
+        getObjectHashUrl() {
+            return `/img/art/${this.node.objectHash}.png`;
         },
         backgroundCss() {
             if (!this.node.image) {
