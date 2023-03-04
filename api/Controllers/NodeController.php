@@ -10,13 +10,11 @@ use Controllers\ViewModels\NodeWithNotesViewModel;
 use Controllers\ViewModels\Sidebar\CategoryViewModel;
 use Controllers\ViewModels\Sidebar\TopLevelCategoryViewModel;
 use DataAccess\Models\Mission;
-use DataAccess\Models\MissionVariant;
 use DataAccess\Models\Node;
 use DataAccess\Models\NodeCategory;
 use DataAccess\Models\NodeDifficulty;
 use DataAccess\Models\NodeNote;
 use DataAccess\Models\User;
-use DataAccess\Repositories\MissionVariantRepository;
 use DataAccess\Repositories\NodeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Logging\DebugStack;
@@ -69,11 +67,6 @@ class NodeController {
 
         $addedNodes = [];
         foreach ($nodesWithNotes as $node) {
-            $difficulties = array_map(fn(MissionVariant $nd) => $nd->getVariant(), $node->getVariants()->toArray());
-            if (!in_array($difficulty, $difficulties)) {
-                continue;
-            }
-
             $nodeViewModel = new NodeWithNotesViewModel();
 
             /* @var $note NodeNote */
@@ -180,10 +173,6 @@ class NodeController {
             unset($nodeViewModel->tooltip);
             $nodeViewModel->objectHash = $node['objectHash'];
 
-            foreach ($node['variants'] as $missionVariant) {
-                $nodeViewModel->variants[] = $missionVariant['id'];
-            }
-
             $nodeViewModels[] = $nodeViewModel;
         }
 
@@ -237,17 +226,6 @@ class NodeController {
 
         /* @var $mission Mission */
         $mission = $this->entityManager->getRepository(Mission::class)->findOneBy(['id' => $missionId]);
-
-        $node->getVariants()->clear();
-        foreach ($requestBody['variantIds'] as $selectedVariantId) {
-            $selectedVariant = current(array_filter($mission->getVariants()->toArray(), fn(MissionVariant $variant) => $variant->getId() === $selectedVariantId));
-            if ($selectedVariant === false) {
-                // Somehow got a bad variant. Just skip it.
-                continue;
-            }
-
-            $node->addVariant($selectedVariant);
-        }
 
         $node->getNotes()->clear();
         foreach ($requestBody['notes'] as $note) {

@@ -245,15 +245,6 @@
                         </button>
                     </div>
                 </div>
-                <h3>{{ $t('map.mission-variants') }}</h3>
-                <div class="form-group" v-for="variant in mission.variants">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" :id="`${uid}-variant-${variant.id}`" :value="variant.id" v-model="createEditNodeModel.variantIds">
-                        <label class="form-check-label" :for="`${uid}-variant-${variant.id}`">
-                            {{ lang(`difficulties.${variant.name}`, variant.name) }}
-                        </label>
-                    </div>
-                </div>
             </div>
         </div>
         <template v-slot:modal-footer>
@@ -297,7 +288,6 @@ export default {
                 targetAction: '',
                 image: '',
                 notes: [],
-                variantIds: []
             },
             createEditNodeModel: {
                 category: null,
@@ -307,7 +297,6 @@ export default {
                 targetAction: '',
                 image: '',
                 notes: [],
-                variantIds: []
             },
             icons: {},
             templates: {},
@@ -368,7 +357,6 @@ export default {
                         text: note.text
                     }
                 });
-                this.createEditNodeModel.variantIds = this.node.variants;
             }
         },
         selectCategory(event) {
@@ -448,11 +436,6 @@ export default {
             }
         },
         saveMarker() {
-            if (!this.createEditNodeModel.variantIds.length) {
-                alert('You must select at least one mission variant');
-                return;
-            }
-
             if (this.node) {
                 this.updateMarker();
             } else {
@@ -472,7 +455,6 @@ export default {
                 longitude: this.clickedPoint.lng,
                 image: this.createEditNodeModel.image,
                 notes: this.createEditNodeModel.notes,
-                variantIds: this.createEditNodeModel.variantIds
             }).then(resp => {
                 this.$emit('item-created', resp.data.data);
                 this.$toast.success({
@@ -497,7 +479,6 @@ export default {
                 longitude: this.node.longitude,
                 image: this.createEditNodeModel.image,
                 notes: this.createEditNodeModel.notes,
-                variantIds: this.createEditNodeModel.variantIds
             }).then(resp => {
                 this.$emit('item-updated', resp.data.data);
                 this.$toast.success({

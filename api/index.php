@@ -18,7 +18,6 @@ use DataAccess\Models\Game;
 use DataAccess\Models\Location;
 use DataAccess\Models\MapFloorToName;
 use DataAccess\Models\Mission;
-use DataAccess\Models\MissionVariant;
 use DataAccess\Models\Node;
 use DataAccess\Models\NodeCategory;
 use DataAccess\Models\NodeDifficulty;
@@ -70,16 +69,8 @@ $klein->respond('GET', '/api/v1/games/[:game]/locations/[:location]?', function 
             /* @var $mission Mission */
             foreach ($missions as $mission) {
                 $mission->setIcon();
-                $mission->difficulties = array_map(fn(MissionVariant $mv) => $mv->getVariant(), $mission->getVariants()->toArray());
                 $mission->supportsFreelancer = false;
 
-                foreach ($mission->getVariants()->toArray() as $variant) {
-                    /* @var $variant MissionVariant */
-                    if ($variant->isVisible() && str_contains($variant->getSlug(), 'freelancer')) {
-                        $mission->supportsFreelancer = true;
-                        break;
-                    }
-                }
                 unset($mission->floorNames);
             }
             $location->missions = $missions;
@@ -122,67 +113,6 @@ function userIsAdmin(Request $request, Container $applicationContext, ?string &$
 
     return in_array(1, $userContext->getRolesAsInts());
 }
-
-//region Mission Variants
-$klein->respond('POST', '/api/v1/mission-variants', function(Request $request, Response $response) use ($applicationContext) {
-    $newToken = null;
-    if (!userIsAdmin($request, $applicationContext, $newToken)) {
-        return $response->code(401)->json(['message' => 'You must be logged in to make make edits to maps!']);
-    }
-
-    $body = json_decode($request->body(), true);
-    $entityManager = $applicationContext->get(EntityManager::class);
-    $mission = $entityManager->getRepository(Mission::class)->findOneBy(['id' => intval($body['missionId'])]);
-    if ($mission === null) {
-        return $response->code(404)->json(['message' => 'Mission not found.']);
-    }
-
-    $missionVariant = new MissionVariant();
-    $missionVariant->setVariant($body['name']);
-    $missionVariant->setMission($mission);
-    $missionVariant->setIcon($body['icon']);
-    $missionVariant->setSlug($body['slug']);
-    $missionVariant->setDefault(false);
-    $missionVariant->setVisible($body['visible']);
-    $entityManager->persist($missionVariant);
-    $entityManager->flush();
-
-    $entityManager->getConnection()->executeQuery("INSERT INTO `node_to_mission_variants` (`node_id`, `variant_id`)
-        SELECT `node_id`, {$missionVariant->getId()}
-        FROM `node_to_mission_variants`
-        WHERE `variant_id` = ".intval($body['sourceVariant']));
-
-    $resp = new ApiResponseModel();
-    $resp->token = $newToken;
-    $resp->body = [];
-    return $response->code(200)->json($resp);
-});
-
-$klein->respond('PUT', '/api/v1/mission-variants/[:id]', function(Request $request, Response $response) use ($applicationContext) {
-    $newToken = null;
-    if (!userIsAdmin($request, $applicationContext, $newToken)) {
-        return $response->code(401)->json(['message' => 'You must be logged in to make make edits to maps!']);
-    }
-
-    $body = json_decode($request->body(), true);
-    $entityManager = $applicationContext->get(EntityManager::class);
-    $sql = "UPDATE `mission_to_difficulties`
-        SET `difficulty` = ?,
-            `visible` = ?,
-            `icon` = ?,
-            `slug` = ?
-        WHERE `id` = ?";
-    $stmt = $entityManager->getConnection()->prepare($sql);
-    $stmt->bindParam(1, $body['name']);
-    $stmt->bindParam(2, $body['visible']);
-    $stmt->bindParam(3, $body['icon']);
-    $stmt->bindParam(4, $body['slug']);
-    $stmt->bindValue(5, intval($request->id));
-    $stmt->execute();
-
-    return $response->code(204);
-});
-//endregion
 
 //region Map Data
 $klein->respond('GET', '/api/v1/games/[:game]/locations/[:location]/missions/[:mission]/[:difficulty]/map', function(Request $request, Response $response) use ($applicationContext) {
@@ -420,11 +350,6 @@ function transformNode(Node $node): NodeWithNotesViewModel {
     $nodeViewModel->image = $node->getImage();
     unset($nodeViewModel->tooltip);
     $nodeViewModel->objectHash = $node->getObjectHash();
-
-    /* @var $missionVariant MissionVariant */
-    foreach ($node->getVariants()->toArray() as $missionVariant) {
-        $nodeViewModel->variants[] = $missionVariant->getId();
-    }
 
     return $nodeViewModel;
 }

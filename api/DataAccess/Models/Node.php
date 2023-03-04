@@ -99,16 +99,6 @@ class Node {
     public $objectHash;
 
     /**
-     * @ORM\ManyToMany(targetEntity="MissionVariant", cascade={"persist"})
-     * @ORM\JoinTable(name="node_to_mission_variants",
-     *                joinColumns={@ORM\JoinColumn(name="node_id", referencedColumnName="id")},
-     *                inverseJoinColumns={@ORM\JoinColumn(name="variant_id", referencedColumnName="id", unique=true)}
-     *               )
-     * @var $variants Collection
-     */
-    private $variants;
-
-    /**
      * @ORM\OneToMany(targetEntity="NodeNote", mappedBy="node", fetch="EAGER", cascade={"persist"}, orphanRemoval=true)
      * @var $notes Collection
      */
@@ -116,7 +106,6 @@ class Node {
 
     public function __construct() {
         $this->dateCreated = new \DateTime("now");
-        $this->variants = new ArrayCollection();
         $this->notes = new ArrayCollection();
     }
 
@@ -353,19 +342,6 @@ class Node {
      */
     public function setObjectHash(string $objectHash): void {
         $this->objectHash = $objectHash;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getVariants(): Collection {
-        return $this->variants;
-    }
-
-    public function addVariant(MissionVariant $variant): Node {
-        $this->variants[] = $variant;
-
-        return $this;
     }
 
     /**

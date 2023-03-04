@@ -327,7 +327,6 @@
         "suit-disguise": "Suit ({suitName})",
         "npc": "NPC",
         "blend-in-as": "Blend in as {disguiseName}",
-        "mission-variants": "Mission Variants",
         "edit": "Edit",
         "delete": "Delete",
         "confirm-item-deletion-title": "Confirm {item} Deletion",
@@ -336,7 +335,6 @@
         "hostile-area": "Hostile Area",
         "copy-disguise-areas": "Copy Disguise Areas",
         "levels-slash-items": "Levels / Items",
-        "other-variants": "Other Mission Variants",
         "convert-to-x": "Convert to {type}",
         "freelancer-note": "Due to the random nature of some item spawns, your game may only contain some Freelancer-specific items mapped.",
         "includes-freelancer": "Includes Freelancer"

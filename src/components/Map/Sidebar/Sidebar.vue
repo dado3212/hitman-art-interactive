@@ -7,16 +7,6 @@
                 </router-link>
             </div>
             <div class="header-buttons">
-                <button v-if="getAllVariantsForUser().length > 1"
-                        class="navbar-toggler"
-                        type="button"
-                        data-toggle="collapse"
-                        data-target="#variants-toggle"
-                        aria-controls="variants-toggle"
-                        aria-expanded="true"
-                        aria-label="Toggle variant selection box">
-                    <game-icon :icon="currentVariant.icon" font-style="solid"/>
-                </button>
                 <button class="navbar-toggler"
                         type="button"
                         data-toggle="collapse"
@@ -89,15 +79,6 @@
                 </div>
             </div>
             <div v-show="editorState === 'OFF'">
-                <alert type="info" v-if="currentVariant.icon === 'freelancer'">
-                    {{ $t('map.freelancer-note') }}
-                </alert>
-                <div class="collapse navbar-collapse" id="variants-toggle">
-                    <mission-variant-selector :mission="mission"
-                                              :current-variant="currentVariant"
-                                              :logged-in="loggedIn"
-                                              @variant-selected="onVariantSelected" />
-                </div>
                 <div class="navbar-collapse collapse show" id="search-item-toggle">
                     <item-search :searchable-nodes="getSearchableNodes()" @search-item="onSearchItem" />
                 </div>
@@ -133,7 +114,6 @@ import EditLanding from "./Editing/EditLanding";
 import EditorHeader from "./Editing/EditorHeader";
 import EditItems from "./Editing/EditItems";
 import FloorToggle from "../FloorToggle";
-import MissionVariantSelector from "./MissionVariantSelector";
 import GameIcon from "../../GameIcon";
 import Alert from "../../Alert.vue";
 
@@ -142,7 +122,6 @@ export default {
     components: {
         Alert,
         GameIcon,
-        MissionVariantSelector,
         FloorToggle,
         EditItems,
         EditorHeader,
@@ -159,7 +138,6 @@ export default {
         currentZoomLevel: Number,
         editorState: String,
         drawingActive: Boolean,
-        currentVariant: Object
     },
     data() {
         return {
@@ -177,18 +155,11 @@ export default {
         }
     },
     methods: {
-        getAllVariantsForUser() {
-            if (this.loggedIn) {
-                return this.mission.variants;
-            }
-
-            return this.mission.variants.filter(x => x.visible);
-        },
         showDebug() {
             return process.env.VUE_APP_SHOW_DEBUG === 'true';
         },
         getSearchableNodes() {
-            const nodesToSort = [...this.nodes].filter(x => x.variants.includes(this.currentVariant.id));
+            const nodesToSort = [...this.nodes];
             nodesToSort.sort((first, second) => {
                 if (first.type !== second.type) {
                     // Different types, sort by the types
@@ -269,9 +240,6 @@ export default {
         onChangeFloor(floorNumber) {
             this.$emit('change-floor', floorNumber);
         },
-        onVariantSelected(variant) {
-            this.$emit('variant-selected', variant);
-        }
         //endregion
     }
 }

@@ -107,12 +107,6 @@ class Mission {
     public $missionType;
 
     /**
-     * @ORM\OneToMany(targetEntity="MissionVariant", mappedBy="mission", fetch="EAGER")
-     * @var $variants Collection
-     */
-    public $variants;
-
-    /**
      * @ORM\Column(type="string", name="background_url")
      */
     public $backgroundUrl;
@@ -172,7 +166,6 @@ class Mission {
     }
 
     public function __construct() {
-        $this->variants = new ArrayCollection();
         $this->floorNames = new ArrayCollection();
     }
 
@@ -428,20 +421,6 @@ class Mission {
      */
     public function setMissionType(string $missionType): void {
         $this->missionType = $missionType;
-    }
-
-    /**
-     * @return Collection
-     */
-    public function getVariants(): Collection {
-        return $this->variants;
-    }
-
-    /**
-     * @param Collection $variants
-     */
-    public function setVariants(Collection $variants): void {
-        $this->variants = $variants;
     }
 
     /**

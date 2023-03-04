@@ -19,9 +19,7 @@ class NodeRepository extends EntityRepository {
     public function findByMissionV2(int $missionId): array {
         $qb = $this->createQueryBuilder('node');
 
-        $qb->addSelect('variants')
-            ->addSelect('notes')
-            ->innerJoin('node.variants', 'variants')
+        $qb->addSelect('notes')
             ->leftJoin('node.notes', 'notes')
             ->where($qb->expr()->andX(
                 $qb->expr()->eq('node.approved', 'true'),

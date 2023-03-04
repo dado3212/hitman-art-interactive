@@ -7,7 +7,6 @@
                           :mission="mission"
                           :current-floor="currentFloor"
                           :nodes="nodes"
-                          :current-variant="currentVariant"
                           @change-floor="onChangeFloor"
             />
             <div :class="`hm-editor-${editorState.toLowerCase()}`" id="map"></div>
@@ -23,7 +22,6 @@
                      :min-zoom-level="mission.minZoom"
                      :current-zoom-level="map.getZoom()"
                      :editor-state="editorState"
-                     :current-variant="currentVariant"
                      @hide-all="onHideAll"
                      @show-all="onShowAll"
                      @search-item="onSearchItem"
@@ -34,8 +32,7 @@
                      @zoom-in="onZoomIn"
                      @zoom-out="onZoomOut"
                      @master-edit-toggle="onMasterEditToggle"
-                     @launch-editor="onLaunchEditor"
-                     @variant-selected="onVariantSelected" />
+                     @launch-editor="onLaunchEditor" />
             <node-popup :node="nodeForModal"
                         :logged-in="loggedIn"
                         :game="game"
@@ -102,7 +99,6 @@
                 clickedPoint: null,
                 vertices: [],
                 workingLayer: null,
-                currentVariant: null,
                 //endregion
                 //region Editor-specific
                 editorState: 'OFF',
@@ -129,20 +125,6 @@
                     this.currentFloor = this.mission.startingFloorNumber;
 
                     console.log(this.$route.params);
-                    this.currentVariant = undefined;
-
-                    if (this.$route.params.difficulty) {
-                        // Legacy URLs have the difficulty pre-defined
-                        this.currentVariant = this.mission.variants.find(variant => variant.slug === this.$route.params.difficulty);
-                    } else if (this.$route.query.variant) {
-                        // Or could be in the query string
-                        this.currentVariant = this.mission.variants.find(variant => variant.slug === this.$route.query.variant);
-                    }
-
-                    // If we didn't grab one from the URL, set it to the default
-                    if (this.currentVariant === undefined) {
-                        this.currentVariant = this.mission.variants.find(variant => variant.default);
-                    }
                 });
             //@formatter:on
 
@@ -312,7 +294,7 @@
                 this.nodes.filter(node => node.searchResult).forEach(node => node.visible = true);
 
                 // 4. Add all visible nodes to map if they're on the current level and for the current variant
-                this.nodes.filter(node => node.level === this.currentFloor && node.visible && node.variants.includes(this.currentVariant.id)).forEach(node => {
+                this.nodes.filter(node => node.level === this.currentFloor && node.visible).forEach(node => {
                     node.marker._icon.style.display = 'block';
 
                     if (node.searchResult) {
@@ -503,10 +485,6 @@
             },
             pmLayer: function(e) {
                 this.workingLayer = e.layer;
-            },
-            onVariantSelected(variant) {
-                this.currentVariant = variant;
-                this.updateActiveMapState();
             }
             //endregion
         },

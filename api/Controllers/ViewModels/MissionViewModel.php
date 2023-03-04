@@ -7,7 +7,6 @@ namespace Controllers\ViewModels;
 use BusinessLogic\MissionType;
 use DataAccess\Models\MapFloorToName;
 use DataAccess\Models\Mission;
-use DataAccess\Models\MissionVariant;
 use DateTime;
 use DateTimeInterface;
 
@@ -30,8 +29,6 @@ class MissionViewModel {
     public ?string $beginEffectiveDate;
     public ?string $endEffectiveDate;
     public string $missionType;
-    /* @var $variants MissionVariantViewModel[] */
-    public array $variants = [];
     public string $backgroundUrl;
     public string $tileUrl;
     public bool $svg;
@@ -71,7 +68,6 @@ class MissionViewModel {
             $this->endEffectiveDate = $f->format(DateTimeInterface::ATOM);
         }
         $this->missionType = $mission->getMissionType();
-        $this->variants = array_map(fn(MissionVariant $x) => new MissionVariantViewModel($x), $mission->getVariants()->toArray());
         $this->backgroundUrl = $mission->getBackgroundUrl();
         $this->tileUrl = $mission->getTileUrl();
         $this->svg = $mission->getSvg();
